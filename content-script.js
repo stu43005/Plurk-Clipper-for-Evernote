@@ -48,15 +48,17 @@ var app = {
 	},
 
 	showClipWindow: function(pid) {
-		app.getNoteStore().then(function(noteStore) {
-			noteStore.listNotebooks(app.token, function(notebooks) {
-					console.log(notebooks);
-				},
-				function onerror(error) {
-					console.log(error);
+		return app.getNoteStore().then(function(noteStore) {
+			return app.getTmpl("clip_template.html").then(function(html) {
+				return app.createPopWindow({
+					content: html,
+					width: 700
+				}).then(function(pop) {
+					return pop.show();
 				});
-
-			var wid = app.createGbWindow("Clip Plurk");
+			}).then(function(pop) {
+				return new Clip(pid, pop, noteStore, app.token);
+			});
 		});
 	},
 
@@ -170,51 +172,81 @@ var app = {
 		}
 	},
 
-	makeNote: function(noteStore, noteTitle, noteBody, parentNotebook, callback) {
-		var nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-		nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">";
-		nBody += "<en-note>" + noteBody + "</en-note>";
-
-		// Create note object
-		var newNote = new Evernote.Note();
-		newNote.title = noteTitle;
-		newNote.content = nBody;
-
-		// parentNotebook is optional; if omitted, default notebook is used
-		if (parentNotebook && parentNotebook.guid) {
-			newNote.notebookGuid = parentNotebook.guid;
-		}
-
-		// Attempt to create note in Evernote account
-		noteStore.createNote(app.token, newNote, function(err, note) {
-			if (err) {
-				// Something was wrong with the note data
-				// See EDAMErrorCode enumeration for error code explanation
-				// http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
-				console.log(err);
-			} else {
-				callback(note);
+	createPopWindow: function(options) {
+		options.id = '__pop_window__' + (new Date()).getTime();
+		options.content = '<div id="' + options.id + '">' + (options.content || '') + '</div>';
+		return app.localScript(function(options) {
+			function trigger(name) {
+				return document.dispatchEvent(new CustomEvent(name));
 			}
-		});
+			options.onShow = function() {
+				trigger(options.id + "__onShow");
+			};
+			options.onClose = function() {
+				trigger(options.id + "__onClose");
+			};
 
+			if (typeof top.PopWindow.extensionDelegates == "undefined") {
+				top.PopWindow.extensionDelegates = {};
+			}
+			var pop = top.PopWindow.extensionDelegates[options.id] = new PopWindow(options);
+			jQuery(".pop-window-content", pop.view).css("padding", 0);
+		}, options, true).then(function() {
+			var delegate = {
+				id: options.id,
+				options: options,
+				show: function() {
+					return new Promise(function(resolve, reject) {
+						function onShow() {
+							resolve(delegate);
+							app.unbindEvent(options.id + "__onShow", onShow);
+						}
+						app.bindEvent(options.id + "__onShow", onShow);
+
+						app.localScript(function(id) {
+							top.PopWindow.extensionDelegates[id].show();
+						}, options.id);
+					}).then(function(pop) {
+						if (options.onShow) {
+							options.onShow(pop);
+						}
+						return pop;
+					});
+				},
+				close: function() {
+					return new Promise(function(resolve, reject) {
+						function onClose() {
+							resolve(delegate);
+							app.unbindEvent(options.id + "__onClose", onClose);
+						}
+						app.bindEvent(options.id + "__onClose", onClose);
+
+						app.localScript(function(id) {
+							top.PopWindow.extensionDelegates[id].close();
+						}, options.id);
+					}).then(function(pop) {
+						if (options.onClose) {
+							options.onClose(pop);
+						}
+						return pop;
+					});
+				},
+				layout: function(isAnimate) {
+					app.localScript(function(args) {
+						top.PopWindow.extensionDelegates[args.id].layout(args.isAnimate);
+					}, {
+						id: options.id,
+						isAnimate: isAnimate || false
+					});
+					return Promise.resolve(delegate);
+				}
+			};
+			return delegate;
+		});
 	},
 
-	createGbWindow: function(title, html, w, h) {
-		var id = '__GB_window__' + (new Date()).getTime();
-		html = '<div id="' + id + '">' + (html || '') + '</div>';
-		w = w || 500;
-		h = h || 500;
-		app.localScript(function(args) {
-			var a = jQuery(args.html);
-			top.GB_showHTML(args.title, a[0], args.w, args.h);
-		}, {
-			title,
-			html,
-			w,
-			h
-		});
-		return id;
-	},
+	bindEvent: document.addEventListener.bind(document),
+	unbindEvent: document.removeEventListener.bind(document),
 
 	getQueryParams: function(query) {
 		if (query.charAt(0) !== "?") query = "?" + query;
@@ -272,7 +304,10 @@ var app = {
 				var div = document.getElementById(id);
 				if (div) {
 					try {
-						var value = JSON.parse(div.firstChild.nodeValue);
+						var value;
+						if (div.firstChild.nodeValue != "undefined") {
+							value = JSON.parse(div.firstChild.nodeValue);
+						}
 						resolve(value);
 					} catch (e) {
 						reject(e);
@@ -283,6 +318,12 @@ var app = {
 				}
 			}
 			setTimeout(retrive, 500);
+		});
+	},
+
+	getTmpl: function(name) {
+		return new Promise(function(resolve, reject) {
+			$.get(chrome.extension.getURL("tmpl/" + name)).done(resolve).fail(reject);
 		});
 	},
 

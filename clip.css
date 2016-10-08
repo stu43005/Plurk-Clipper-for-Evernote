@@ -1,0 +1,66 @@
+#clip_to_evernote .content_inner {
+    padding: 15px;
+    margin: 0!important
+}
+
+#clip_to_evernote th {
+    width: 120px;
+    padding: 7px 12px;
+    vertical-align: top;
+    text-align: right;
+    font-weight: normal;
+    color: #9999a0;
+    font-size: 13px
+}
+
+#clip_to_evernote td {
+    padding: 3px 0
+}
+
+#clip_to_evernote input[type=text], #clip_to_evernote select, #clip_to_evernote textarea {
+    border: 1px solid #fff;
+    cursor: pointer;
+}
+
+#clip_to_evernote input[type=text]:hover, #clip_to_evernote textarea:hover, #clip_to_evernote select:hover {
+    border-color: #EEE;
+    background: #EEE
+}
+
+#clip_to_evernote input[type=text]:focus, #clip_to_evernote textarea:focus, #clip_to_evernote select:focus {
+    border-color: #CCC;
+    background: #FFF;
+    cursor: inherit
+}
+
+#clip_to_evernote select {
+    -webkit-appearance: none;
+    appearance: none;
+    -moz-appearance: none;
+    text-indent: .01px;
+    text-overflow: '';
+    padding-right: 10px
+}
+
+#clip_to_evernote .es {
+    text-align: left;
+    padding: 0 0 2px 0;
+    font-size: 11px
+}
+
+#clip_to_evernote .help {
+    color: #bbbbc0;
+    font-size: 11px;
+    line-height: 1.4
+}
+
+#clip_to_evernote p.help {
+    margin: 0
+}
+
+#clip_to_evernote .invisible_line {
+    clear: both;
+    height: 1px;
+    background: #eeeef5;
+    margin: 15px 0
+}

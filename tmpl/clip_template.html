@@ -1,0 +1,69 @@
+<div v-if="!show" class="pop-window-loading"><img src="//s.plurk.com/3dffb16b3316e8f28df661fdf3952dfc.gif"></div>
+<div id="clip_to_evernote" v-bind:style="{ opacity: show ? 1 : 0 }">
+	<div id="pop-window-header">
+		<div class="pop-window-title">Clip to Evernote</div>
+		<div class="pop-window-close pif-cancel" v-on:click="closeWindow"></div>
+	</div>
+
+	<div class="content_inner">
+		<table>
+			<tr>
+				<th>
+					記事標題<br />
+					<span class="help">請控制在 255 個字以內</span>
+				</th>
+				<td><textarea v-model="title" class="title" rows="2" tabindex="5" placeholder="未命名記事" maxlength="255" style="width: 405px; height: 50px;"></textarea></td>
+			</tr>
+			<tr>
+				<th>記事本</th>
+				<td>
+					<select v-model="nbSelected">
+						<template v-for="notebook in notebooks">
+							<optgroup v-if="notebook.stack" v-bind:label="notebook.stack">
+								<option v-for="notebook2 in notebook.list" v-bind:value="notebook2">{{ notebook2.name }}</option>
+							</optgroup>
+							<option v-else v-bind:value="notebook">{{ notebook.name }}</option>
+						</template>
+					</select>
+					<br />
+					<span class="help">找不到嗎？<a href="#" class="nbRefreshNotebooks" v-on:click.prevent="nbRefreshNotebooks">重新整理清單</a></span>
+				</td>
+			</tr>
+			<tr>
+				<th>標籤</th>
+				<td>
+					<div class="auto_ta" v-on:click="$('#clip_to_evernote .tagInput').focus()">
+						<ul>
+							<li v-for="tag in tTag" class="person token" v-on:click="deleteTag(tag)">
+								<div>{{ typeof tag == "string" ? tag : tag.name }}<img src="//s.plurk.com/e53f5da063e999cd58ac4a3c6c8d3fe3.gif"/></div>
+							</li>
+							<li class="token">
+								<input type="text" class="tagInput" v-model="tagInput" v-on:keyup.enter="addTag" placeholder="新增標籤" list="accTags" style="width: 70px;">
+								<datalist id="accTags">
+									<option v-for="tag in accTags" v-bind:value="tag.name"></option>
+								</datalist>
+							</li>
+						</ul>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>註解</th>
+				<td>
+					<textarea class="comments" v-model="comments" rows="1" tabindex="4" placeholder="添加註解"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<th></th>
+				<td class="es">
+					<input type="button" value="儲存" v-bind:disabled="saving" v-on:click="saveToEvernote">
+					<img v-show="saving" src="//s.plurk.com/3dffb16b3316e8f28df661fdf3952dfc.gif" width="36px" height="36px">
+					<br />
+					<span v-show="error" class="error">{{ error }}</span>
+				</td>
+			</tr>
+		</table>
+		<div class="invisible_line"></div>
+		<div class="preview" v-html="preview" style=" height: 300px; overflow-y: auto; "></div>
+	</div>
+</div>

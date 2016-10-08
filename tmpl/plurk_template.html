@@ -1,0 +1,59 @@
+<div>
+<table style=" width: 100%; ">
+	<tr>
+		<td rowspan="2" style=" width: 70px; margin: 0 10px 12px 0; vertical-align: top; ">
+			<a href="https://www.plurk.com/user/<%= user.nick_name %>">
+				<% if (user.avatar === null) { %>
+				<img src="https://s.plurk.com/6a7b744055ac7ccf2beeff563c5270f6.gif" alt="" width="60" height="60" />
+				<% } else { %>
+				<img src="https://avatars.plurk.com/<%= user.uid %>-medium<%= user.avatar %>.gif" alt="" width="60" height="60" />
+				<% } %>
+			</a>
+		</td>
+		<td style=" margin-bottom: 6px; line-height: 1em; padding: 1px 0 3px; height: 1em; ">
+			<a href="https://www.plurk.com/<%= user.nick_name %>" style=" text-decoration: none; font-weight: bold; color: #<%= user.name_color || 'cf5a00' %>; "><%= user.display_name %></a>
+			<span style=" float: right; color: #9f9f9f; font-size: .75em; line-height: 1em; margin: 0; visibility: visible; ">
+				<a href="https://www.plurk.com/p/<%= plurk.id.toString(36) %>" style=" color: #9f9f9f; "><%= plurk.posted %></a>
+			</span>
+		</td>
+	</tr>
+	<tr>
+		<td style=" vertical-align: top; "><%- plurk.content %></td>
+	</tr>
+	<tr>
+		<td colspan="2" style=" border-top: 1px solid #ddd; ">
+		<% if (plurk.response_count > 0) { %>
+			<a style=" text-decoration: none; font-weight: bold; margin: 9px 0 4px 10px; padding: 2px 6px; border-radius: 5px; font-size: 12px; float: left; background: #CCC; color: #444!important; "><%= plurk.response_count %> 回應</a>
+		<% } %>
+		<% if (plurk.favorite_count > 0) { %>
+			<a style=" text-decoration: none; margin: 9px 0 4px 10px; padding: 2px 6px; color: #FFF; float: left; border-radius: 5px; font-size: 12px; background: #54a4be; "><%= plurk.favorite_count %> 喜歡</a>
+		<% } %>
+		<% if (plurk.replurkers_count > 0) { %>
+			<a style=" text-decoration: none; margin: 9px 0 4px 10px; padding: 2px 6px; color: #FFF; float: left; border-radius: 5px; font-size: 12px; background: #56b892; "><%= plurk.replurkers_count %> 轉噗</a>
+		<% } %>
+		</td>
+	</tr>
+<% if (responses.response_count > 0) { %>
+	<% responses.responses.forEach(function(response){ %>
+	<tr>
+		<td rowspan="2" style=" width: 70px; margin: 0 10px 12px 0; vertical-align: top; ">
+			<a href="https://www.plurk.com/user/<%= responses.friends[response.user_id].nick_name %>">
+				<% if (responses.friends[response.user_id].avatar === null) { %>
+				<img src="https://s.plurk.com/6a7b744055ac7ccf2beeff563c5270f6.gif" alt="" width="60" height="60" />
+				<% } else { %>
+				<img src="https://avatars.plurk.com/<%= responses.friends[response.user_id].uid %>-medium<%= responses.friends[response.user_id].avatar %>.gif" alt="" width="60" height="60" />
+				<% } %>
+			</a>
+		</td>
+		<td style=" margin-bottom: 6px; line-height: 1em; padding: 1px 0 3px; height: 1em; ">
+			<a href="https://www.plurk.com/<%= responses.friends[response.user_id].nick_name %>" style=" text-decoration: none; font-weight: bold; color: #<%= responses.friends[response.user_id].name_color || 'cf5a00' %>; "><%= responses.friends[response.user_id].display_name %></a>
+			<span style=" float: right; color: #9f9f9f; font-size: .75em; line-height: 1em; margin: 0; visibility: visible; "><%= response.posted %></span>
+		</td>
+	</tr>
+	<tr>
+		<td style=" vertical-align: top; "><%- response.content %></td>
+	</tr>
+	<% }); %>
+<% } %>
+</table>
+</div>
