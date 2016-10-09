@@ -213,12 +213,18 @@ Clip.prototype.clearPlurkContent = function(content) {
 				"margin": "1px 2px 4px 0",
 				"position": "relative",
 			});
-			self.find("img").css({
+			var img = self.find("img").css({
 				"padding": "0",
 				"margin": "0",
 				"height": "auto",
 				"max-width": "500px",
 			});
+			// change Plurk images to bigger!!
+			var src = img.attr("src");
+			var href = self.attr("href");
+			if (src.indexOf("images.plurk.com") != -1 && (src != href)) {
+				img.attr("src", href);
+			}
 		}
 		if (self.hasClass("meta")) {
 			self.css({
