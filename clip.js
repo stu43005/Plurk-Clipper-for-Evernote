@@ -32,6 +32,12 @@ var Clip = function(pid, pop, noteStore, token) {
 				this.show = false;
 				self.loadNotebooks();
 			},
+			nbSetDefault: function() {
+				chrome.extension.sendRequest({
+					type: 'set_default_notebook',
+					guid: this.nbSelected.guid
+				}, function(response) {});
+			},
 			addTag: function() {
 				var tag = this.accTags.find((t) => t.name == this.tagInput);
 				if (!tag) {
@@ -56,10 +62,15 @@ var Clip = function(pid, pop, noteStore, token) {
 
 Clip.prototype.loadNotebooks = function() {
 	var self = this;
-	// console.log(this.noteStore, this.token);
-
 	this.asyncCount++;
-	this.noteStore.listNotebooks(this.token, function(notebooks) {
+
+	var loadNb = new Promise(function(resolve, reject) {
+		self.noteStore.listNotebooks(self.token, function(notebooks) {
+			resolve(notebooks);
+		}, function(error) {
+			reject(error);
+		});
+	}).then(function(notebooks) {
 		var list = [];
 		var stacks = {};
 		for (var i = 0; i < notebooks.length; i++) {
@@ -80,21 +91,44 @@ Clip.prototype.loadNotebooks = function() {
 		}
 		// console.log("notebooks", notebooks, list);
 		self.vue.notebooks = list;
-		self.asyncCount--;
-		self.show();
-	}, function(error) {
-		console.error(error);
-		self.vue.error = JSON.stringify(e);
+		return notebooks;
 	});
 
-	this.asyncCount++;
-	this.noteStore.listTags(this.token, function(tags) {
+	var loadDefaultNb = new Promise(function(resolve, reject) {
+		chrome.extension.sendRequest({
+			type: 'get_default_notebook'
+		}, function(response) {
+			resolve(response.guid);
+		});
+	});
+
+	var p1 = Promise.all([loadNb, loadDefaultNb]).then(function(d) {
+		var [notebooks, guid] = d;
+		if (!!guid) {
+			var notebook = notebooks.find((nb) => nb.guid == guid);
+			if (notebook) {
+				self.vue.nbSelected = notebook;
+			}
+		}
+	});
+
+	var loadTag = new Promise(function(resolve, reject) {
+		self.noteStore.listTags(self.token, function(tags) {
+			resolve(tags);
+		}, function(error) {
+			reject(error);
+		});
+	}).then(function(tags) {
 		// console.log("tags", tags);
 		self.vue.accTags = tags;
+		return tags;
+	});
+
+	return Promise.all([loadNb, loadDefaultNb, p1, loadTag]).then(function() {
 		self.asyncCount--;
 		self.show();
-	}, function(error) {
-		console.error(error);
+	}).catch(function(e) {
+		console.error(e);
 		self.vue.error = JSON.stringify(e);
 	});
 };
