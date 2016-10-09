@@ -35,6 +35,7 @@
 	</tr>
 <% if (responses.response_count > 0) { %>
 	<% responses.responses.forEach(function(response){ %>
+		<% if (typeof responses.friends[response.user_id] == "undefined") { return; } %>
 	<tr>
 		<td rowspan="2" style=" width: 70px; margin: 0 10px 12px 0; vertical-align: top; ">
 			<a href="https://www.plurk.com/user/<%= responses.friends[response.user_id].nick_name %>">
