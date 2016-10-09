@@ -28,7 +28,7 @@
 							</optgroup>
 							<option v-else v-bind:value="notebook">{{ notebook.name }}</option>
 						</template>
-					</select><span class="help" v-show="nbSelected"><a href="#" class="nbSetDefault" v-on:click.prevent="nbSetDefault">設為預設</a></span><br />
+					</select><span class="help" v-show="nbSelected != nbDefault"><a href="#" class="nbSetDefault" v-on:click.prevent="nbSetDefault">設為預設</a></span><br />
 					<span class="help">找不到嗎？<a href="#" class="nbRefreshNotebooks" v-on:click.prevent="nbRefreshNotebooks">重新整理清單</a></span>
 				</td>
 			</tr>

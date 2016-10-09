@@ -13,6 +13,7 @@ var Clip = function(pid, pop, noteStore, token) {
 			saving: false,
 			title: "",
 			nbSelected: null,
+			nbDefault: null,
 			notebooks: [],
 			tagInput: "",
 			tTag: [],
@@ -108,6 +109,7 @@ Clip.prototype.loadNotebooks = function() {
 			var notebook = notebooks.find((nb) => nb.guid == guid);
 			if (notebook) {
 				self.vue.nbSelected = notebook;
+				self.vue.nbDefault = notebook;
 			}
 		}
 	});
