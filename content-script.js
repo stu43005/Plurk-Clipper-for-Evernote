@@ -48,16 +48,21 @@ var app = {
 	},
 
 	showClipWindow: function(pid) {
-		return app.getNoteStore().then(function(noteStore) {
+		return app.createPopWindow({
+			width: 700
+		}).then(function(pop) {
+			return pop.show();
+		}).then(function(pop) {
 			return app.getTmpl("clip_template.html").then(function(html) {
-				return app.createPopWindow({
-					content: html,
-					width: 700
-				}).then(function(pop) {
-					return pop.show();
-				});
-			}).then(function(pop) {
+				$("#" + pop.id).append(html);
+				return pop;
+			});
+		}).then(function(pop) {
+			return app.getNoteStore().then(function(noteStore) {
 				return new Clip(pid, pop, noteStore, app.token);
+			}).catch(function(e) {
+				console.error(e);
+				$("#" + pop.id + " .pop-window-loading .error").show();
 			});
 		});
 	},
@@ -68,8 +73,6 @@ var app = {
 			var noteStoreProtocol = new Thrift.BinaryProtocol(noteStoreTransport);
 			var noteStore = new NoteStoreClient(noteStoreProtocol);
 			return noteStore;
-		}, function(e) {
-			console.error(e);
 		});
 	},
 
@@ -190,7 +193,7 @@ var app = {
 				top.PopWindow.extensionDelegates = {};
 			}
 			var pop = top.PopWindow.extensionDelegates[options.id] = new PopWindow(options);
-			jQuery(".pop-window-content", pop.view).css("padding", 0);
+			jQuery(".pop-window-content", pop.view).css("padding", 0).css("height", "100%");
 		}, options, true).then(function() {
 			var delegate = {
 				id: options.id,

@@ -1,5 +1,9 @@
-<div v-if="!show" class="pop-window-loading"><img src="//s.plurk.com/3dffb16b3316e8f28df661fdf3952dfc.gif"></div>
-<div id="clip_to_evernote" v-bind:style="{ opacity: show ? 1 : 0 }">
+<div v-if="!show" class="pop-window-loading">
+	<img src="//s.plurk.com/3dffb16b3316e8f28df661fdf3952dfc.gif" />
+	<br />
+	<div class="error" v-show="error"><div>好像有點怪怪的，試著重新整理頁面看看！</div></div>
+</div>
+<div id="clip_to_evernote" style=" opacity: 0; " v-bind:style="{ opacity: show ? 1 : 0 }">
 	<div id="pop-window-header">
 		<div class="pop-window-title">Clip to Evernote</div>
 		<div class="pop-window-close pif-cancel" v-on:click="closeWindow"></div>

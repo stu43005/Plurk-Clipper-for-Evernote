@@ -84,6 +84,7 @@ Clip.prototype.loadNotebooks = function() {
 		self.show();
 	}, function(error) {
 		console.error(error);
+		self.vue.error = JSON.stringify(e);
 	});
 
 	this.asyncCount++;
@@ -94,6 +95,7 @@ Clip.prototype.loadNotebooks = function() {
 		self.show();
 	}, function(error) {
 		console.error(error);
+		self.vue.error = JSON.stringify(e);
 	});
 };
 
@@ -116,7 +118,12 @@ Clip.prototype.renderPreview = function() {
 		}
 	}, {
 		pid: this.pid
-	}, true);
+	}, true).then(function(plurk) {
+		// convert date to UTC String
+		plurk.posted = (new Date(plurk.posted)).toUTCString();
+		plurk.content = self.clearPlurkContent(plurk.content);
+		return plurk;
+	});
 
 	var user = plurk.then(function(plurk) {
 		return app.localScript(function(args) {
@@ -140,24 +147,27 @@ Clip.prototype.renderPreview = function() {
 			var response = JSON.parse(data.replace(/new\sDate\(([^\(\)]+)\)/ig, "$1"));
 			resolve(response);
 		}).fail(reject);
+	}).then(function(responses) {
+		responses.responses.forEach(function(response) {
+			response.content = self.clearPlurkContent(response.content);
+		});
+		return responses;
 	});
 
 	return Promise.all([plurk, user, tmpl, responses]).then(function(d) {
 		var [plurk, user, tmpl, responses] = d;
 		self.vue.title = user.display_name + " " + plurk.content_raw.substr(0, 40) + " - #" + plurk.id.toString(36) + " - Plurk";
-		plurk.content = self.clearPlurkContent(plurk.content);
-		responses.responses.forEach(function(response) {
-			response.content = self.clearPlurkContent(response.content);
-		});
-		return ejs.render(tmpl, {
+		self.vue.preview = ejs.render(tmpl, {
 			plurk: plurk,
 			user: user,
 			responses: responses,
 		});
-	}).then(function(html) {
-		self.vue.preview = html;
+	}).then(function() {
 		self.asyncCount--;
 		self.show();
+	}).catch(function(e) {
+		console.log(e);
+		self.vue.error = e.message;
 	});
 };
 
@@ -246,19 +256,29 @@ Clip.prototype.clearPlurkContent = function(content) {
 		Object.keys(self.data()).forEach(k => self.removeAttr("data-" + k));
 	});
 	content = tmp.html();
+	// adding end-tag
 	content = content.replace(/\<img([^\>]*)\/?\>/g, "<img$1 />");
 	content = content.replace(/\<br([^\>]*)\/?\>/g, "<br$1 />");
 	return content;
 };
 
 Clip.prototype.saveToEvernote = function() {
-	var self = this;
 	if (this.asyncCount > 0) {
 		return;
 	}
 	this.vue.saving = true;
+
 	var url = "https://www.plurk.com/p/" + this.pid.toString(36);
-	return this.makeNote(url, this.vue.title, this.vue.comments + this.vue.preview, this.vue.nbSelected, this.vue.tTag).then(function(note) {
+	var comment = "";
+	if (this.vue.comments != "") {
+		// escaping comments string
+		comment = $("<div/>").append($("<div/>").text(this.vue.comments), "<hr />").html();
+		// adding hr end-tag
+		comment = comment.replace(/\<hr([^\>]*)\/?\>/g, "<hr$1 />");
+	}
+
+	var self = this;
+	return this.makeNote(url, this.vue.title, comment + this.vue.preview, this.vue.nbSelected, this.vue.tTag).then(function(note) {
 		self.popWindow.close();
 	}, function(e) {
 		self.vue.error = JSON.stringify(e);
@@ -283,7 +303,7 @@ Clip.prototype.makeNote = function(noteUrl, noteTitle, noteBody, parentNotebook,
 		newNote.notebookGuid = parentNotebook.guid;
 	}
 
-	if (tags instanceof Array && tags.length > 0) {
+	if (tags && tags instanceof Array && tags.length > 0) {
 		newNote.tagNames = [];
 		newNote.tagGuids = [];
 		for (var i = 0; i < tags.length; i++) {
@@ -297,7 +317,9 @@ Clip.prototype.makeNote = function(noteUrl, noteTitle, noteBody, parentNotebook,
 
 	var newNoteAttributes = new NoteAttributes();
 	newNoteAttributes.sourceURL = noteUrl;
-	newNoteAttributes.sourceApplication = chrome.runtime.getManifest().name;
+	try {
+		newNoteAttributes.sourceApplication = chrome.runtime.getManifest().name;
+	} catch (e) {}
 
 	newNote.attributes = newNoteAttributes;
 
