@@ -264,7 +264,7 @@ var app = {
 	localScript: function(func, args, getReturn) {
 		var id = '__localScript__' + (new Date()).getTime();
 		var jsonArgs = JSON.stringify(args);
-		var scriptText = 'window["' + id + '"] = (' + func + ')(' + jsonArgs + ');';
+		var scriptText = (getReturn ? 'window["' + id + '"] = ' : '') + '(' + func + ')(' + jsonArgs + ');';
 
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
@@ -285,42 +285,36 @@ var app = {
 	 */
 	getGlobalVariable: function(variable) {
 		var id = '__getGlobalVariable__' + (new Date()).getTime();
-		app.localScript(function(args) {
-			function getValue(obj, variable) {
-				var value = obj[variable[0]];
-				if (variable.length > 1) return getValue(value, variable.slice(1));
-				return value;
-			}
-			var text = JSON.stringify(getValue(window, args.variable.split(".")));
-			var div = document.createElement('div');
-			div.id = args.id;
-			div.style.display = 'none';
-			div.appendChild(document.createTextNode(text));
-			document.body.appendChild(div);
-		}, {
-			variable: variable,
-			id: id
-		});
-
 		return new Promise(function(resolve, reject) {
-			function retrive() {
-				var div = document.getElementById(id);
-				if (div) {
-					try {
-						var value;
-						if (div.firstChild.nodeValue != "undefined") {
-							value = JSON.parse(div.firstChild.nodeValue);
-						}
-						resolve(value);
-					} catch (e) {
-						reject(e);
-					}
-					div.parentNode.removeChild(div);
-				} else {
-					setTimeout(retrive, 500);
-				}
+			function onGet(e) {
+				resolve(e.detail);
+				app.unbindEvent(id, onGet);
 			}
-			setTimeout(retrive, 500);
+			app.bindEvent(id, onGet);
+
+			app.localScript(function(args) {
+				function trigger(name, data) {
+					var event = new CustomEvent(name, {
+						"detail": data
+					});
+					return document.dispatchEvent(event);
+				}
+				function getValue(obj, variable) {
+					var value = obj[variable[0]];
+					if (variable.length > 1) return getValue(value, variable.slice(1));
+					return value;
+				}
+
+				var value = getValue(window, args.variable.split("."));
+				trigger(args.id, value);
+
+				if (args.variable.indexOf("__localScript__") != -1) {
+					delete window[args.variable];
+				}
+			}, {
+				variable: variable,
+				id: id
+			});
 		});
 	},
 
