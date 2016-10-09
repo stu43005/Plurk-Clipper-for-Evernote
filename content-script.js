@@ -198,6 +198,7 @@ var app = {
 			var delegate = {
 				id: options.id,
 				options: options,
+				el: document.getElementById(options.id),
 				show: function() {
 					return new Promise(function(resolve, reject) {
 						function onShow() {

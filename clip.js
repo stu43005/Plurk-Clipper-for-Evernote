@@ -295,7 +295,7 @@ Clip.prototype.makeNote = function(noteUrl, noteTitle, noteBody, parentNotebook,
 
 	// Create note object
 	var newNote = new Note();
-	newNote.title = noteTitle;
+	newNote.title = noteTitle.replace(/\n/g, "").trim();
 	newNote.content = nBody;
 
 	// parentNotebook is optional; if omitted, default notebook is used
