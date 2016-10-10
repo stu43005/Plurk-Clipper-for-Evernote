@@ -255,10 +255,13 @@ Clip.prototype.clearPlurkContent = function(content) {
 				"height": "auto",
 				"max-width": "500px",
 			});
-			// change Plurk images to bigger!!
+			// change images to bigger!!
 			var src = img.attr("src");
 			var href = self.attr("href");
 			if (src.indexOf("images.plurk.com") != -1 && (src != href)) {
+				img.attr("src", href);
+			}
+			if (href.indexOf("i.imgur.com") != -1 && (src != href)) {
 				img.attr("src", href);
 			}
 		}
