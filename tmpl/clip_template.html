@@ -1,7 +1,8 @@
 <div v-if="!show" class="pop-window-loading">
 	<img src="//s.plurk.com/3dffb16b3316e8f28df661fdf3952dfc.gif" />
 	<br />
-	<div class="error" v-show="error"><div>好像有點怪怪的，試著重新整理頁面看看！</div></div>
+	<div class="error reload-require" style="display: none;" v-show="error"><div>好像有點怪怪的，試著重新整理頁面看看！</div></div>
+	<div class="error no-login" style="display: none;"><div>尚未授權Plurk Clipper，請先授權後再繼續。</div></div>
 </div>
 <div id="clip_to_evernote" style=" opacity: 0; " v-bind:style="{ opacity: show ? 1 : 0 }">
 	<div id="pop-window-header">

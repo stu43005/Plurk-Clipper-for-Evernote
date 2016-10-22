@@ -62,7 +62,11 @@ var app = {
 				return new Clip(pid, pop, noteStore, app.token);
 			}).catch(function(e) {
 				console.error(e);
-				$("#" + pop.id + " .pop-window-loading .error").show();
+				if (e == "no login") {
+					$("#" + pop.id + " .pop-window-loading .no-login").show();
+				} else {
+					$("#" + pop.id + " .pop-window-loading .reload-require").show();
+				}
 			});
 		});
 	},
