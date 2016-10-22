@@ -4,8 +4,9 @@
     "version": "0.1.0",
     "description": "Clip Plurk's content to Evernote.",
     "icons": {
-        "128": "128.png",
-        "16": "16.png"
+        "128": "images/128.png",
+        "48": "images/48.png",
+        "16": "images/16.png"
     },
     "author": "Shiaupiau",
     "background": {
