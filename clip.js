@@ -83,6 +83,7 @@ Clip.prototype.loadNotebooks = function() {
 						stack: notebooks[i].stack,
 						list: []
 					};
+					list.push(stacks[notebooks[i].stack]);
 				}
 				stacks[notebooks[i].stack].list.push(notebooks[i]);
 			}
@@ -105,7 +106,7 @@ Clip.prototype.loadNotebooks = function() {
 
 	var p1 = Promise.all([loadNb, loadDefaultNb]).then(function(d) {
 		var [notebooks, guid] = d;
-		if (!!guid) {
+		if (guid) {
 			var notebook = notebooks.find((nb) => nb.guid == guid);
 			if (notebook) {
 				self.vue.nbSelected = notebook;

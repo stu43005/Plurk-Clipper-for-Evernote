@@ -1,3 +1,10 @@
+if (localStorage.getItem('token') == "undefined") {
+	localStorage.removeItem('token');
+}
+if (localStorage.getItem('noteStoreUrl') == "undefined") {
+	localStorage.removeItem('noteStoreUrl');
+}
+
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 	if (request.type == 'require_verifier') {
 		var tabId = sender.tab.id;
@@ -22,7 +29,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 	}
 	if (request.type == "get_default_notebook") {
 		sendResponse({
-			guid: localStorage.getItem('default_notebook_guid') || "",
+			guid: localStorage.getItem('default_notebook_guid'),
 		});
 	}
 });
