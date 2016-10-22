@@ -324,8 +324,8 @@ var app = {
 	},
 
 	getTmpl: function(name) {
-		return new Promise(function(resolve, reject) {
-			$.get(chrome.extension.getURL("tmpl/" + name)).done(resolve).fail(reject);
+		return fetch(chrome.extension.getURL("tmpl/" + name)).then(function(response) {
+			return response.text();
 		});
 	},
 
