@@ -26,12 +26,8 @@ var app = {
 			$(".bigplurk .controls").append($("<span/>", {
 				id: "clip_plurk",
 				"class": "s_False",
-				html: app.getClipButton(pid)
+				html: app.getClipButton(pid).append("Clip to Evernote")
 			}));
-
-			app.localScript(function() {
-				AddHoverToolTip(jQuery("#clip_plurk").get(0), "Clip to Evernote");
-			});
 		}
 	},
 
