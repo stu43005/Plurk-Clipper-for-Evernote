@@ -222,7 +222,7 @@ Clip.prototype.renderPreview = function() {
 		self.asyncCount--;
 		self.show();
 	}).catch(function(e) {
-		console.log(e);
+		console.error(e);
 		self.vue.error = e.message;
 	});
 };
@@ -346,6 +346,7 @@ Clip.prototype.saveToEvernote = function() {
 	return this.makeNote(url, this.vue.title, comment + this.vue.preview, this.vue.nbSelected, this.vue.tTag).then(function(note) {
 		self.popWindow.close();
 	}, function(e) {
+		console.error(e);
 		self.vue.error = JSON.stringify(e);
 		self.vue.saving = false;
 	});
