@@ -3,11 +3,7 @@
 	<tr>
 		<td rowspan="2" style=" width: 70px; margin: 0 10px 12px 0; vertical-align: top; ">
 			<a href="https://www.plurk.com/user/<%= user.nick_name %>">
-				<% if (user.avatar === null) { %>
-				<img src="https://s.plurk.com/6a7b744055ac7ccf2beeff563c5270f6.gif" alt="" width="60" height="60" />
-				<% } else { %>
-				<img src="https://avatars.plurk.com/<%= user.uid %>-medium<%= user.avatar %>.gif" alt="" width="60" height="60" />
-				<% } %>
+				<img src="<%= user.avatar_imgsrc %>" alt="" width="60" height="60" />
 			</a>
 		</td>
 		<td style=" margin-bottom: 6px; line-height: 1em; padding: 1px 0 3px; height: 1em; ">
@@ -39,11 +35,7 @@
 	<tr>
 		<td rowspan="2" style=" width: 70px; margin: 0 10px 12px 0; vertical-align: top; ">
 			<a href="https://www.plurk.com/user/<%= responses.friends[response.user_id].nick_name %>">
-				<% if (responses.friends[response.user_id].avatar === null) { %>
-				<img src="https://s.plurk.com/6a7b744055ac7ccf2beeff563c5270f6.gif" alt="" width="60" height="60" />
-				<% } else { %>
-				<img src="https://avatars.plurk.com/<%= responses.friends[response.user_id].uid %>-medium<%= responses.friends[response.user_id].avatar %>.gif" alt="" width="60" height="60" />
-				<% } %>
+				<img src="<%= responses.friends[response.user_id].avatar_imgsrc %>" alt="" width="60" height="60" />
 			</a>
 		</td>
 		<td style=" margin-bottom: 6px; line-height: 1em; padding: 1px 0 3px; height: 1em; ">

@@ -167,7 +167,12 @@ Clip.prototype.renderPreview = function() {
 
 	var user = plurk.then(function(plurk) {
 		return app.localScript(function(args) {
-			return SiteState.getUserById(args.uid);
+			var user = SiteState.getUserById(args.uid);
+			user.avatar_imgsrc = Users.getUserImgSrc(user, "medium");
+			if (!user.display_name) {
+				user.display_name = user.nick_name;
+			}
+			return user;
 		}, {
 			uid: plurk.owner_id
 		}, true);
@@ -191,7 +196,18 @@ Clip.prototype.renderPreview = function() {
 		responses.responses.forEach(function(response) {
 			response.content = self.clearPlurkContent(response.content);
 		});
-		return responses;
+		var waits = Object.keys(responses.friends).map(function(key) {
+			var friend = responses.friends[key];
+			return app.localScript(function(user) {
+				return Users.getUserImgSrc(user, "medium");
+			}, friend, true).then(function(src) {
+				friend.avatar_imgsrc = src;
+				if (!friend.display_name) {
+					friend.display_name = friend.nick_name;
+				}
+			})
+		});
+		return Promise.all(waits).then(_ => responses);
 	});
 
 	return Promise.all([plurk, user, tmpl, responses]).then(function(d) {
