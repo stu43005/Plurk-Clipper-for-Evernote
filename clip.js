@@ -148,10 +148,13 @@ Clip.prototype.renderPreview = function() {
 	this.asyncCount++;
 
 	var plurk = app.localScript(function(args) {
-		for (var i = 0; i < TimeLine.plurks.length; i++) {
-			if (TimeLine.plurks[i].id == args.pid) {
-				return TimeLine.plurks[i];
-			}
+		if (TimeLine.plurks) {
+			// for timeline
+			return TimeLine.plurks.find(p => p.id == args.pid);
+		}
+		if (typeof plurk !== "undefined") {
+			// for permaplurk
+			return plurk;
 		}
 	}, {
 		pid: this.pid
