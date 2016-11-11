@@ -148,7 +148,7 @@ Clip.prototype.renderPreview = function() {
 	this.asyncCount++;
 
 	var plurk = app.localScript(function(args) {
-		if (TimeLine.plurks) {
+		if (TimeLine && TimeLine.plurks) {
 			// for timeline
 			return TimeLine.plurks.find(p => p.id == args.pid);
 		}
@@ -159,6 +159,7 @@ Clip.prototype.renderPreview = function() {
 	}, {
 		pid: this.pid
 	}, true).then(function(plurk) {
+		if (typeof plurk != "object") return Promise.reject("Fetch plurk data failed.");
 		// convert date to UTC String
 		plurk.posted = (new Date(plurk.posted)).toUTCString();
 		plurk.content = self.clearPlurkContent(plurk.content);

@@ -6,6 +6,17 @@ var app = {
 	noteStoreUrl: null,
 
 	init: function() {
+		// check Timeline
+		app.localScript(function() {
+			return typeof TimeLine;
+		}, null, true).then(function(type) {
+			if (type != "undefined") {
+				app._init();
+			}
+		});
+	},
+
+	_init: function() {
 		if ($("body").hasClass("timeline")) {
 			// 河道
 			$("#timeline_holder").on("mouseover", ".plurk", function() {
