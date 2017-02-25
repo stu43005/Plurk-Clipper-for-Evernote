@@ -181,18 +181,22 @@ Clip.prototype.renderPreview = function() {
 
 	var tmpl = app.getTmpl("plurk_template.html");
 
-	var responses = new Promise(function(resolve, reject) {
-		$.ajax({
-			url: "https://www.plurk.com/Responses/get2",
-			type: "POST",
-			data: {
-				plurk_id: self.pid,
-				from_response: 0
-			}
-		}).done(function(data) {
-			var response = JSON.parse(data.replace(/new\sDate\(([^\(\)]+)\)/ig, "$1"));
-			resolve(response);
-		}).fail(reject);
+	var responses = fetch("//www.plurk.com/Responses/get2", {
+		credentials: 'same-origin',
+		method: 'POST',
+		body: (function() {
+			var params = new URLSearchParams();
+			params.set("plurk_id", self.pid);
+			params.set("from_response", 0);
+			params.set("js_date", false);
+			return params;
+		})()
+	}).then(function(resp) {
+		var contentType = response.headers.get("content-type");
+		if (contentType && contentType.indexOf("application/json") !== -1) {
+			return response.json();
+		}
+		return JSON.parse(resp.text().replace(/new\sDate\(([^\(\)]+)\)/ig, "$1"));
 	}).then(function(responses) {
 		responses.responses.forEach(function(response) {
 			response.content = self.clearPlurkContent(response.content);
