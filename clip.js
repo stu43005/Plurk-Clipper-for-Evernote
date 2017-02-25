@@ -191,12 +191,12 @@ Clip.prototype.renderPreview = function() {
 			params.set("js_date", false);
 			return params;
 		})()
-	}).then(function(resp) {
+	}).then(function(response) {
 		var contentType = response.headers.get("content-type");
 		if (contentType && contentType.indexOf("application/json") !== -1) {
 			return response.json();
 		}
-		return JSON.parse(resp.text().replace(/new\sDate\(([^\(\)]+)\)/ig, "$1"));
+		return JSON.parse(response.text().replace(/new\sDate\(([^\(\)]+)\)/ig, "$1"));
 	}).then(function(responses) {
 		responses.responses.forEach(function(response) {
 			response.content = self.clearPlurkContent(response.content);
