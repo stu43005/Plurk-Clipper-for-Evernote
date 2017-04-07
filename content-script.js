@@ -8,7 +8,7 @@ var app = {
 	init: function() {
 		// check Timeline
 		app.localScript(function() {
-			return typeof TimeLine;
+			return typeof PlurkTimeline;
 		}, null, true).then(function(type) {
 			if (type != "undefined") {
 				app._init();

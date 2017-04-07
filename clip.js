@@ -148,9 +148,9 @@ Clip.prototype.renderPreview = function() {
 	this.asyncCount++;
 
 	var plurk = app.localScript(function(args) {
-		if (TimeLine && TimeLine.plurks) {
+		if (PlurksManager) {
 			// for timeline
-			return TimeLine.plurks.find(p => p.id == args.pid);
+			return PlurksManager.getPlurkById(args.pid);
 		}
 		if (typeof plurk !== "undefined") {
 			// for permaplurk
@@ -168,8 +168,8 @@ Clip.prototype.renderPreview = function() {
 
 	var user = plurk.then(function(plurk) {
 		return app.localScript(function(args) {
-			var user = SiteState.getUserById(args.uid);
-			user.avatar_imgsrc = Users.getUserImgSrc(user, "medium");
+			var user = Users.getUserById(args.uid);
+			user.avatar_imgsrc = Users.getUserImageUrl(user, "medium");
 			if (!user.display_name) {
 				user.display_name = user.nick_name;
 			}
@@ -204,7 +204,7 @@ Clip.prototype.renderPreview = function() {
 		var waits = Object.keys(responses.friends).map(function(key) {
 			var friend = responses.friends[key];
 			return app.localScript(function(user) {
-				return Users.getUserImgSrc(user, "medium");
+				return Users.getUserImageUrl(user, "medium");
 			}, friend, true).then(function(src) {
 				friend.avatar_imgsrc = src;
 				if (!friend.display_name) {
