@@ -147,19 +147,19 @@ Clip.prototype.renderPreview = function() {
 	var self = this;
 	this.asyncCount++;
 
-	var plurk = app.localScript(function(args) {
-		if (PlurksManager) {
-			// for timeline
-			return PlurksManager.getPlurkById(args.pid);
-		}
+	var plurk = localScript(function(args) {
 		if (typeof plurk !== "undefined") {
 			// for permaplurk
 			return plurk;
 		}
+		if (PlurksManager) {
+			// for timeline
+			return PlurksManager.getPlurkById(args.pid);
+		}
 	}, {
 		pid: this.pid
-	}, true).then(function(plurk) {
-		if (typeof plurk != "object") return Promise.reject("Fetch plurk data failed.");
+	}).then(function(plurk) {
+		if (typeof plurk != "object") throw "Fetch plurk data failed.";
 		// convert date to UTC String
 		plurk.posted = (new Date(plurk.posted)).toUTCString();
 		plurk.content = self.clearPlurkContent(plurk.content);
@@ -167,7 +167,7 @@ Clip.prototype.renderPreview = function() {
 	});
 
 	var user = plurk.then(function(plurk) {
-		return app.localScript(function(args) {
+		return localScript(function(args) {
 			var user = Users.getUserById(args.uid);
 			user.avatar_imgsrc = Users.getUserImageUrl(user, "medium");
 			if (!user.display_name) {
@@ -176,7 +176,7 @@ Clip.prototype.renderPreview = function() {
 			return user;
 		}, {
 			uid: plurk.owner_id
-		}, true);
+		});
 	});
 
 	var tmpl = app.getTmpl("plurk_template.html");
@@ -203,9 +203,9 @@ Clip.prototype.renderPreview = function() {
 		});
 		var waits = Object.keys(responses.friends).map(function(key) {
 			var friend = responses.friends[key];
-			return app.localScript(function(user) {
+			return localScript(function(user) {
 				return Users.getUserImageUrl(user, "medium");
-			}, friend, true).then(function(src) {
+			}, friend).then(function(src) {
 				friend.avatar_imgsrc = src;
 				if (!friend.display_name) {
 					friend.display_name = friend.nick_name;

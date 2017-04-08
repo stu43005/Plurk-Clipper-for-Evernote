@@ -1,0 +1,18 @@
+{
+  "name": "plurk_clipper_for_evernote",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stu43005/Plurk-Clipper-for-Evernote.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stu43005/Plurk-Clipper-for-Evernote/issues"
+  },
+  "homepage": "https://github.com/stu43005/Plurk-Clipper-for-Evernote#readme",
+  "dependencies": {
+    "localscript": "^1.0.2"
+  }
+}

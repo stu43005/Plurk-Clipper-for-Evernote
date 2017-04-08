@@ -7,9 +7,9 @@ var app = {
 
 	init: function() {
 		// check Timeline
-		app.localScript(function() {
+		localScript(function() {
 			return typeof PlurkTimeline;
-		}, null, true).then(function(type) {
+		}).then(function(type) {
 			if (type != "undefined") {
 				app._init();
 			}
@@ -25,7 +25,7 @@ var app = {
 				var pid = $(this).data("pid");
 				$(".manager", this).prepend(app.getClipButton(pid));
 
-				app.localScript(function() {
+				localScript(function() {
 					AddHoverToolTip(jQuery(".manager .action.clip").get(0), "Clip to Evernote");
 				});
 			});
@@ -189,7 +189,7 @@ var app = {
 	createPopWindow: function(options) {
 		options.id = '__pop_window__' + (new Date()).getTime();
 		options.content = '<div id="' + options.id + '">' + (options.content || '') + '</div>';
-		return app.localScript(function(options) {
+		return localScript(function(options) {
 			function trigger(name) {
 				return document.dispatchEvent(new CustomEvent(name));
 			}
@@ -205,7 +205,7 @@ var app = {
 			}
 			var pop = top.PopWindow.extensionDelegates[options.id] = new PopWindow(options);
 			jQuery(".pop-window-content", pop.view).css("padding", 0).css("height", "100%");
-		}, options, true).then(function() {
+		}, options).then(function() {
 			var delegate = {
 				id: options.id,
 				options: options,
@@ -218,7 +218,7 @@ var app = {
 						}
 						app.bindEvent(options.id + "__onShow", onShow);
 
-						app.localScript(function(id) {
+						localScript(function(id) {
 							top.PopWindow.extensionDelegates[id].show();
 						}, options.id);
 					}).then(function(pop) {
@@ -236,7 +236,7 @@ var app = {
 						}
 						app.bindEvent(options.id + "__onClose", onClose);
 
-						app.localScript(function(id) {
+						localScript(function(id) {
 							top.PopWindow.extensionDelegates[id].close();
 						}, options.id);
 					}).then(function(pop) {
@@ -247,7 +247,7 @@ var app = {
 					});
 				},
 				layout: function(isAnimate) {
-					app.localScript(function(args) {
+					localScript(function(args) {
 						top.PopWindow.extensionDelegates[args.id].layout(args.isAnimate);
 					}, {
 						id: options.id,
@@ -266,68 +266,6 @@ var app = {
 	getQueryParams: function(query) {
 		if (query.charAt(0) !== "?") query = "?" + query;
 		return purl(query).param();
-	},
-
-	/**
-	 * 執行本地腳本
-	 * @param  {Function} func     函數
-	 * @param  {object}   args     參數
-	 */
-	localScript: function(func, args, getReturn) {
-		var id = '__localScript__' + (new Date()).getTime();
-		var jsonArgs = JSON.stringify(args);
-		var scriptText = (getReturn ? 'window["' + id + '"] = ' : '') + '(' + func + ')(' + jsonArgs + ');';
-
-		var script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.appendChild(document.createTextNode(scriptText));
-		document.body.appendChild(script);
-
-		setTimeout(function() {
-			script.parentNode.removeChild(script);
-		}, 1000);
-
-		if (getReturn) return app.getGlobalVariable(id);
-		else Promise.resolve();
-	},
-
-	/**
-	 * 取得全域變數
-	 * @param  {string}   variable 變數名稱
-	 */
-	getGlobalVariable: function(variable) {
-		var id = '__getGlobalVariable__' + (new Date()).getTime();
-		return new Promise(function(resolve, reject) {
-			function onGet(e) {
-				resolve(e.detail);
-				app.unbindEvent(id, onGet);
-			}
-			app.bindEvent(id, onGet);
-
-			app.localScript(function(args) {
-				function trigger(name, data) {
-					var event = new CustomEvent(name, {
-						"detail": data
-					});
-					return document.dispatchEvent(event);
-				}
-				function getValue(obj, variable) {
-					var value = obj[variable[0]];
-					if (variable.length > 1) return getValue(value, variable.slice(1));
-					return value;
-				}
-
-				var value = getValue(window, args.variable.split("."));
-				trigger(args.id, value);
-
-				if (args.variable.indexOf("__localScript__") != -1) {
-					delete window[args.variable];
-				}
-			}, {
-				variable: variable,
-				id: id
-			});
-		});
 	},
 
 	getTmpl: function(name) {
