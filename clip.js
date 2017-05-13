@@ -182,7 +182,7 @@ Clip.prototype.renderPreview = function() {
 	var tmpl = app.getTmpl("plurk_template.html");
 
 	var responses = fetch("//www.plurk.com/Responses/get2", {
-		credentials: 'same-origin',
+		credentials: 'include',
 		method: 'POST',
 		body: (function() {
 			var params = new URLSearchParams();
