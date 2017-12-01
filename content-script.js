@@ -84,6 +84,26 @@ var app = {
 			var noteStoreProtocol = new Thrift.BinaryProtocol(noteStoreTransport);
 			var noteStore = new NoteStoreClient(noteStoreProtocol);
 			return noteStore;
+		}).then(function(noteStore) {
+			return new Promise(function (resolve, reject) {
+				noteStore.listNotebooks(app.token, function (notebooks) {
+					resolve(noteStore);
+				}, function (error) {
+					reject(error);
+				})
+			});
+		}).catch(function() {
+			app.token = null;
+			app.noteStoreUrl = null;
+			chrome.extension.sendRequest({
+				type: 'set_edam',
+				data: {
+					oauth_token: null,
+					edam_noteStoreUrl: null,
+				}
+			}, function (response) {});
+			app.loginWithEvernote();
+			return Promise.reject('no login');
 		});
 	},
 
